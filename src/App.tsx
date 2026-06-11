@@ -1,21 +1,30 @@
 import { useEffect, useRef, useState } from 'react'
-import { BalloonText, FONTS } from './balloon/BalloonText'
+import { TextFX, FONTS, type ModeKind } from './balloon/TextFX'
 import './App.css'
+
+const MODES: { key: ModeKind; label: string; icon: string }[] = [
+  { key: 'balloon', label: 'Balloon', icon: '🎈' },
+  { key: 'particles', label: 'Particles', icon: '✨' },
+  { key: 'bubbles', label: 'Bubbles', icon: '🫧' },
+]
 
 function App() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const engineRef = useRef<BalloonText | null>(null)
+  const engineRef = useRef<TextFX | null>(null)
 
   const [text, setText] = useState('hello')
+  const [mode, setMode] = useState<ModeKind>('balloon')
   const [textColor, setTextColor] = useState('#ff5d8f')
   const [multicolor, setMulticolor] = useState(true)
   const [bgColor, setBgColor] = useState('#141233')
   const [strings, setStrings] = useState(false)
   const [fontKey, setFontKey] = useState('helvetiker_bold')
+  const [sphereCount, setSphereCount] = useState(420)
+  const [sphereSize, setSphereSize] = useState(1)
 
   useEffect(() => {
     if (!canvasRef.current) return
-    const engine = new BalloonText(canvasRef.current)
+    const engine = new TextFX(canvasRef.current)
     engineRef.current = engine
     engine.setOptions({ color: textColor, multicolor, strings, fontKey })
     engine.setText('hello')
@@ -35,6 +44,11 @@ function App() {
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     inflate()
+  }
+
+  const onPickMode = (key: ModeKind) => {
+    setMode(key)
+    engineRef.current?.setMode(key)
   }
 
   const onPickTextColor = (hex: string) => {
@@ -61,14 +75,38 @@ function App() {
     engineRef.current?.setFont(key)
   }
 
+  const onSphereSize = (v: number) => {
+    setSphereSize(v)
+    engineRef.current?.setSphereSize(v)
+  }
+
+  const onSphereCount = (v: number) => {
+    setSphereCount(v)
+    engineRef.current?.setSphereCount(v)
+  }
+
   return (
     <div className="stage" style={{ backgroundColor: bgColor }}>
       <canvas ref={canvasRef} className="scene" />
 
       <header className="topbar">
         <span className="brand">🎈 balloon.type</span>
-        <span className="tip">drag a letter · fling it · watch it bob</span>
+        <span className="tip">drag · fling · steal · pop</span>
       </header>
+
+      <div className="modebar">
+        {MODES.map((m) => (
+          <button
+            key={m.key}
+            type="button"
+            className={`modebtn ${mode === m.key ? 'active' : ''}`}
+            onClick={() => onPickMode(m.key)}
+          >
+            <span className="modeicon">{m.icon}</span>
+            {m.label}
+          </button>
+        ))}
+      </div>
 
       <aside className="controls">
         <label className="row">
@@ -101,12 +139,13 @@ function App() {
           />
         </label>
 
-        <label className="row">
+        <label className={`row ${mode !== 'balloon' ? 'disabled' : ''}`}>
           <span>Strings</span>
           <button
             type="button"
             className={`toggle ${strings ? 'on' : ''}`}
             onClick={onToggleStrings}
+            disabled={mode !== 'balloon'}
             aria-pressed={strings}
           >
             <span className="knob" />
@@ -123,6 +162,33 @@ function App() {
             ))}
           </select>
         </label>
+
+        {mode === 'bubbles' && (
+          <>
+            <label className="row slider">
+              <span>Spheres {sphereCount}</span>
+              <input
+                type="range"
+                min={100}
+                max={1000}
+                step={20}
+                value={sphereCount}
+                onChange={(e) => onSphereCount(Number(e.target.value))}
+              />
+            </label>
+            <label className="row slider">
+              <span>Ball size {sphereSize.toFixed(1)}×</span>
+              <input
+                type="range"
+                min={0.5}
+                max={2}
+                step={0.1}
+                value={sphereSize}
+                onChange={(e) => onSphereSize(Number(e.target.value))}
+              />
+            </label>
+          </>
+        )}
       </aside>
 
       <form className="panel" onSubmit={onSubmit}>
@@ -135,13 +201,13 @@ function App() {
           autoFocus
         />
         <button type="submit" className="go">
-          Inflate
+          Generate
         </button>
         <button
           type="button"
           className="pop"
           onClick={() => engineRef.current?.popAll()}
-          title="Pop them all"
+          title="Burst it"
         >
           Pop
         </button>
