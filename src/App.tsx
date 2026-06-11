@@ -1,121 +1,152 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
+import { useEffect, useRef, useState } from 'react'
+import { BalloonText, FONTS } from './balloon/BalloonText'
 import './App.css'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const engineRef = useRef<BalloonText | null>(null)
+
+  const [text, setText] = useState('hello')
+  const [textColor, setTextColor] = useState('#ff5d8f')
+  const [multicolor, setMulticolor] = useState(true)
+  const [bgColor, setBgColor] = useState('#141233')
+  const [strings, setStrings] = useState(false)
+  const [fontKey, setFontKey] = useState('helvetiker_bold')
+
+  useEffect(() => {
+    if (!canvasRef.current) return
+    const engine = new BalloonText(canvasRef.current)
+    engineRef.current = engine
+    engine.setOptions({ color: textColor, multicolor, strings, fontKey })
+    engine.setText('hello')
+    return () => {
+      engine.dispose()
+      engineRef.current = null
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  const inflate = () => {
+    const value = text.trim().slice(0, 14)
+    if (!value) return
+    engineRef.current?.setText(value)
+  }
+
+  const onSubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    inflate()
+  }
+
+  const onPickTextColor = (hex: string) => {
+    setTextColor(hex)
+    setMulticolor(false)
+    engineRef.current?.setMulticolor(false)
+    engineRef.current?.setColor(hex)
+  }
+
+  const onToggleMulticolor = () => {
+    const next = !multicolor
+    setMulticolor(next)
+    engineRef.current?.setMulticolor(next)
+  }
+
+  const onToggleStrings = () => {
+    const next = !strings
+    setStrings(next)
+    engineRef.current?.setStrings(next)
+  }
+
+  const onPickFont = (key: string) => {
+    setFontKey(key)
+    engineRef.current?.setFont(key)
+  }
 
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
+    <div className="stage" style={{ backgroundColor: bgColor }}>
+      <canvas ref={canvasRef} className="scene" />
+
+      <header className="topbar">
+        <span className="brand">🎈 balloon.type</span>
+        <span className="tip">drag a letter · fling it · watch it bob</span>
+      </header>
+
+      <aside className="controls">
+        <label className="row">
+          <span>Text color</span>
+          <input
+            type="color"
+            value={textColor}
+            onChange={(e) => onPickTextColor(e.target.value)}
+          />
+        </label>
+
+        <label className="row">
+          <span>Multicolor</span>
+          <button
+            type="button"
+            className={`toggle ${multicolor ? 'on' : ''}`}
+            onClick={onToggleMulticolor}
+            aria-pressed={multicolor}
+          >
+            <span className="knob" />
+          </button>
+        </label>
+
+        <label className="row">
+          <span>Background</span>
+          <input
+            type="color"
+            value={bgColor}
+            onChange={(e) => setBgColor(e.target.value)}
+          />
+        </label>
+
+        <label className="row">
+          <span>Strings</span>
+          <button
+            type="button"
+            className={`toggle ${strings ? 'on' : ''}`}
+            onClick={onToggleStrings}
+            aria-pressed={strings}
+          >
+            <span className="knob" />
+          </button>
+        </label>
+
+        <label className="row">
+          <span>Font</span>
+          <select value={fontKey} onChange={(e) => onPickFont(e.target.value)}>
+            {FONTS.map((f) => (
+              <option key={f.key} value={f.key}>
+                {f.label}
+              </option>
+            ))}
+          </select>
+        </label>
+      </aside>
+
+      <form className="panel" onSubmit={onSubmit}>
+        <input
+          className="field"
+          value={text}
+          maxLength={14}
+          placeholder="type a name…"
+          onChange={(e) => setText(e.target.value)}
+          autoFocus
+        />
+        <button type="submit" className="go">
+          Inflate
+        </button>
         <button
           type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
+          className="pop"
+          onClick={() => engineRef.current?.popAll()}
+          title="Pop them all"
         >
-          Count is {count}
+          Pop
         </button>
-      </section>
-
-      <div className="ticks"></div>
-
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+      </form>
+    </div>
   )
 }
 
