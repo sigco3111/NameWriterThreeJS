@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { TextFX, FONTS, type ModeKind } from './balloon/TextFX'
+import { t } from './i18n'
 import './App.css'
 
 const MODES: { key: ModeKind; label: string; icon: string }[] = [
-  { key: 'balloon', label: 'Balloon', icon: '🎈' },
-  { key: 'particles', label: 'Particles', icon: '✨' },
-  { key: 'bubbles', label: 'Bubbles', icon: '🫧' },
+  { key: 'balloon', label: t('modeBalloon'), icon: '🎈' },
+  { key: 'particles', label: t('modeParticles'), icon: '✨' },
+  { key: 'bubbles', label: t('modeBubbles'), icon: '🫧' },
 ]
 
 function App() {
@@ -90,8 +91,8 @@ function App() {
       <canvas ref={canvasRef} className="scene" />
 
       <header className="topbar">
-        <span className="brand">🎈 balloon.type</span>
-        <span className="tip">drag · fling · steal · pop</span>
+        <span className="brand" title={t('brandHover')}>{t('appBrand')}</span>
+        <span className="tip">{t('tip')}</span>
       </header>
 
       <div className="modebar">
@@ -110,7 +111,7 @@ function App() {
 
       <aside className="controls">
         <label className="row">
-          <span>Text color</span>
+          <span>{t('textColor')}</span>
           <input
             type="color"
             value={textColor}
@@ -119,7 +120,7 @@ function App() {
         </label>
 
         <label className="row">
-          <span>Multicolor</span>
+          <span>{t('multicolor')}</span>
           <button
             type="button"
             className={`toggle ${multicolor ? 'on' : ''}`}
@@ -131,7 +132,7 @@ function App() {
         </label>
 
         <label className="row">
-          <span>Background</span>
+          <span>{t('background')}</span>
           <input
             type="color"
             value={bgColor}
@@ -140,7 +141,7 @@ function App() {
         </label>
 
         <label className={`row ${mode !== 'balloon' ? 'disabled' : ''}`}>
-          <span>Strings</span>
+          <span>{t('strings')}</span>
           <button
             type="button"
             className={`toggle ${strings ? 'on' : ''}`}
@@ -153,7 +154,7 @@ function App() {
         </label>
 
         <label className="row">
-          <span>Font</span>
+          <span>{t('font')}</span>
           <select value={fontKey} onChange={(e) => onPickFont(e.target.value)}>
             {FONTS.map((f) => (
               <option key={f.key} value={f.key}>
@@ -166,7 +167,7 @@ function App() {
         {mode === 'bubbles' && (
           <>
             <label className="row slider">
-              <span>Spheres {sphereCount}</span>
+              <span>{t('spheresCount')(sphereCount)}</span>
               <input
                 type="range"
                 min={100}
@@ -177,7 +178,7 @@ function App() {
               />
             </label>
             <label className="row slider">
-              <span>Ball size {sphereSize.toFixed(1)}×</span>
+              <span>{t('ballSize')(sphereSize)}</span>
               <input
                 type="range"
                 min={0.5}
@@ -196,20 +197,20 @@ function App() {
           className="field"
           value={text}
           maxLength={14}
-          placeholder="type a name…"
+          placeholder={t('placeholder')}
           onChange={(e) => setText(e.target.value)}
           autoFocus
         />
         <button type="submit" className="go">
-          Generate
+          {t('generate')}
         </button>
         <button
           type="button"
           className="pop"
           onClick={() => engineRef.current?.popAll()}
-          title="Burst it"
+          title={t('popTitle')}
         >
-          Pop
+          {t('pop')}
         </button>
       </form>
     </div>
