@@ -1,4 +1,4 @@
-# 🎈 NameWriterThreeJS — 풍선 이름 (한국어 한글판)
+# 🎈 NameWriterThreeJS — 풍선 이름
 
 **Three.js + React 19 + cannon-es + gsap + balloon 라이브러리** 기반의 **인터랙티브 풍선 이름 시뮬레이터** 입니다. 입력한 텍스트가 각 글자마다 풍선/파티클/거품 으로 변환되어 화면에 떠다니고, 마우스로 드래그하거나 던지거나 터뜨릴 수 있습니다. 본 저장소는 `achrefelouafi/NameWriterThreeJS` 의 **sigco3111 한국어 fork** 입니다 — 모든 컨트롤과 안내문을 한글로 제공하며, `src/i18n.ts` 가 한국어/영문 양쪽 키를 모두 보관합니다.
 
